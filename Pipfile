@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+invoke = "*"
+py-project-template = {editable = true,path = "."}
+tox = "*"
+
+[packages]
+click = "==7.0"
+
+[requires]
+python_version = "3.6"
