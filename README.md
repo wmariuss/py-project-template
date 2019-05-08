@@ -14,7 +14,7 @@ Development
 
 * `pip install pipenv`
 * `pipenv install --dev`
-* `pipenv run trequire --help` or `pipenv shell` and execute `trequire --help`
+* `pipenv run py-project-template --help` or `pipenv shell` and execute `py-project-template --help`
 
 Build executable
 
