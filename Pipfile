@@ -9,6 +9,7 @@ invoke = "*"
 py-project-template = {editable = true,path = "."}
 tox = "*"
 pep8 = "*"
+mypy = "*"
 
 [packages]
 click = "==7.0"
