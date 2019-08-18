@@ -1,4 +1,10 @@
+from pathlib import Path
+
 from setuptools import setup
+
+
+with open(str(Path(".") / "README.md"), "r", encoding="utf-8") as f:
+    README = f.read()
 
 setup(
     name='py-project-template',
@@ -9,7 +15,7 @@ setup(
     license='MIT',
     description='Project description',
     packages=['src'],
-    long_description=open('README.md').read(),
+    long_description=README,
     long_description_content_type='text/markdown',
     include_package_data=True,
     package_data={'': ['README.md']},
