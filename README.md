@@ -1,5 +1,8 @@
 # py-project-template
 
+[![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://github.com/wmariuss/py-project-template)
+[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://github.com/wmariuss/py-project-template)
+
 Python project template.
 
 ## Requirements
