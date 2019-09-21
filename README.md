@@ -1,7 +1,8 @@
 # py-project-template
 
-[![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://github.com/wmariuss/py-project-template)
-[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://github.com/wmariuss/py-project-template)
+[![Build Status](https://travis-ci.com/wmariuss/py-project-template.svg?branch=master)](https://travis-ci.com/wmariuss/py-project-template)
+[![Tag](https://img.shields.io/github/v/tag/wmariuss/py-project-template)](https://github.com/wmariuss/py-project-template/tags)
+[![License](https://img.shields.io/github/license/wmariuss/py-project-template)](https://github.com/wmariuss/py-project-template/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Python project template.
