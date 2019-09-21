@@ -3,15 +3,15 @@ import click
 
 @click.group()
 @click.version_option()
-def cli():
-    '''py project template description'''
+def cli() -> None:
+    """py project template description"""
 
 
 @cli.command()
-@click.option('--name', '-n', help="What is your name?")
-def run(name):
-    '''
+@click.option("--name", "-n", help="What is your name?")
+def run(name: str) -> None:
+    """
     Test function
-    '''
+    """
     if name:
-        print(f'Hello {name}')
+        print(f"Hello {name}")

@@ -2,6 +2,7 @@
 
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://github.com/wmariuss/py-project-template)
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://github.com/wmariuss/py-project-template)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Python project template.
 
