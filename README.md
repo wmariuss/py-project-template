@@ -9,7 +9,7 @@ Python project template.
 
 ## Requirements
 
-* `Python >= 3.7`
+* `Python >= 3.6`
 
 ## Install
 
