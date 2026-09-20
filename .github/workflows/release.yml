@@ -1,5 +1,11 @@
 name: Release
 
+# Actions are pinned to exact releases, not floating majors. A floating major
+# is a moving target that can change what runs without a commit here, and it
+# is not even guaranteed to exist: astral-sh/setup-uv stopped publishing one
+# after v7. Dependabot bumps these weekly in one grouped pull request. Pinning
+# to a commit SHA is stronger still, at the cost of a file nobody can read.
+
 on:
   push:
     tags: ["v*"]
@@ -19,7 +25,7 @@ jobs:
     name: Verify the tag
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - name: The tag must match the version in pyproject.toml
         run: |
           tag="${GITHUB_REF_NAME#v}"
@@ -39,8 +45,8 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -51,11 +57,11 @@ jobs:
 
       # Signed evidence of where these files came from, verifiable with
       # `gh attestation verify`. Consumers no longer have to take your word.
-      - uses: actions/attest-build-provenance@v4
+      - uses: actions/attest-build-provenance@v4.2.2
         with:
           subject-path: build/dist/*
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: distributions
           path: |
@@ -77,8 +83,8 @@ jobs:
           - runner: macos-15
             target: macos-aarch64
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -93,7 +99,7 @@ jobs:
       - name: It runs
         run: ./build/bin/py-project-template-${{ matrix.target }} --version
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: executable-${{ matrix.target }}
           path: build/bin/py-project-template-${{ matrix.target }}
@@ -108,17 +114,17 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-buildx-action@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: docker/setup-buildx-action@v4.4.1
 
-      - uses: docker/login-action@v4
+      - uses: docker/login-action@v4.6.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
           tags: |
@@ -127,7 +133,7 @@ jobs:
             type=semver,pattern={{major}}
 
       - id: push
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -137,7 +143,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - uses: actions/attest-build-provenance@v4
+      - uses: actions/attest-build-provenance@v4.2.2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
@@ -158,7 +164,7 @@ jobs:
       # there is no API token in the repository to leak or rotate.
       id-token: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@v8.0.1
         with:
           name: distributions
           path: build
@@ -175,11 +181,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@v8.0.1
         with:
           path: artifacts
           merge-multiple: true
-      - uses: softprops/action-gh-release@v3
+      - uses: softprops/action-gh-release@v3.0.3
         with:
           generate_release_notes: true
           files: |

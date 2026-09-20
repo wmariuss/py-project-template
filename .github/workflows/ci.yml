@@ -1,5 +1,11 @@
 name: CI
 
+# Actions are pinned to exact releases, not floating majors. A floating major
+# is a moving target that can change what runs without a commit here, and it
+# is not even guaranteed to exist: astral-sh/setup-uv stopped publishing one
+# after v7. Dependabot bumps these weekly in one grouped pull request. Pinning
+# to a commit SHA is stronger still, at the cost of a file nobody can read.
+
 on:
   push:
     branches: [master, develop]
@@ -24,8 +30,8 @@ jobs:
     name: Lint and types
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -42,15 +48,15 @@ jobs:
       matrix:
         python: ["3.11", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
           python-version: ${{ matrix.python }}
       - run: uv sync --frozen
       - run: make test
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.1
         if: matrix.python == '3.13'
         with:
           name: coverage
@@ -61,8 +67,8 @@ jobs:
     name: Dependency audit
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -72,8 +78,8 @@ jobs:
     name: Package
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -86,8 +92,8 @@ jobs:
 
       # Built on every change, pushed only on a tag. A release should never be
       # the first time the Dockerfile is exercised.
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/build-push-action@v7
+      - uses: docker/setup-buildx-action@v4.4.1
+      - uses: docker/build-push-action@v7.4.0
         with:
           context: .
           push: false

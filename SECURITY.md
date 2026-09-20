@@ -19,6 +19,8 @@ Expect an acknowledgement within a few days and an assessment shortly after.
   Verify one with `gh attestation verify <file> --repo wmariuss/py-project-template`.
 - PyPI publishing uses Trusted Publishing, so there is no long-lived API token
   in this repository to leak.
+- GitHub Actions are pinned to exact releases rather than floating majors, so
+  nothing changes what runs without a commit in this repository.
 - Dependabot opens weekly update pull requests for Python dependencies, GitHub
   Actions and the container base image.
 - The container runs as an unprivileged user, and CI fails if that regresses.
