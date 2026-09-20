@@ -1,5 +1,21 @@
-tasks.py
-env.sh
-.vscode
+# Keep the build context small and the layers reproducible. Everything the
+# build actually needs is listed by exception at the bottom.
 .git
-README.md
+.github
+.venv
+build
+dist
+*.egg-info
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.coverage
+coverage.xml
+htmlcov
+__pycache__
+*.py[cod]
+.idea
+.vscode
+
+# README.md and LICENSE are NOT excluded: pyproject.toml declares them as the
+# readme and the licence file, so the wheel build reads both.
