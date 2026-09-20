@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.12.17"
+  REGISTRY: ghcr.io
+
+jobs:
+  # Nothing else runs until the tag and the declared version agree. Catching
+  # this here costs ten seconds; catching it after publishing costs a yanked
+  # release and a version number you can never reuse.
+  verify:
+    name: Verify the tag
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: The tag must match the version in pyproject.toml
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(python3 -c "import tomllib,pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          echo "tag=$tag pyproject=$version"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match pyproject version $version"
+            exit 1
+          fi
+
+  distributions:
+    name: Wheel, sdist and SBOM
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
+      - run: make build
+      - run: uv tool run twine check --strict build/dist/*
+      - run: make sbom
+
+      # Signed evidence of where these files came from, verifiable with
+      # `gh attestation verify`. Consumers no longer have to take your word.
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: build/dist/*
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: distributions
+          path: |
+            build/dist/*
+            build/sbom.json
+
+  executables:
+    name: Executable for ${{ matrix.target }}
+    needs: verify
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux-x86_64
+          - runner: ubuntu-24.04-arm
+            target: linux-aarch64
+          - runner: macos-15
+            target: macos-aarch64
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
+      # Embeds a portable CPython, so the result runs on a machine with no
+      # Python installed at all.
+      - run: make binary
+
+      - name: Name it after the platform it runs on
+        run: mv build/bin/py-project-template build/bin/py-project-template-${{ matrix.target }}
+
+      - name: It runs
+        run: ./build/bin/py-project-template-${{ matrix.target }} --version
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: executable-${{ matrix.target }}
+          path: build/bin/py-project-template-${{ matrix.target }}
+
+  image:
+    name: Container image
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - id: push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ github.repository }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+  publish:
+    name: Publish to PyPI
+    needs: [distributions, executables, image]
+    runs-on: ubuntu-24.04
+    # Opt in by setting the repository variable PUBLISH_TO_PYPI to "true".
+    # A template should not try to publish itself.
+    if: vars.PUBLISH_TO_PYPI == 'true'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/py-project-template
+    permissions:
+      # Trusted Publishing: PyPI verifies this workflow's OIDC identity, so
+      # there is no API token in the repository to leak or rotate.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: distributions
+          path: build
+      - name: Keep only the distributions
+        run: rm -f build/sbom.json
+      - uses: pypa/gh-action-pypi-publish@v1.14.2
+        with:
+          packages-dir: build/dist
+
+  github_release:
+    name: GitHub release
+    needs: [distributions, executables, image]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/dist/*
+            artifacts/sbom.json
+            artifacts/py-project-template-*
