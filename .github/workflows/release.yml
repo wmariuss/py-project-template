@@ -46,7 +46,7 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -61,7 +61,7 @@ jobs:
         with:
           subject-path: build/dist/*
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: distributions
           path: |
@@ -84,7 +84,7 @@ jobs:
             target: macos-aarch64
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
@@ -99,7 +99,7 @@ jobs:
       - name: It runs
         run: ./build/bin/py-project-template-${{ matrix.target }} --version
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: executable-${{ matrix.target }}
           path: build/bin/py-project-template-${{ matrix.target }}
@@ -164,7 +164,7 @@ jobs:
       # there is no API token in the repository to leak or rotate.
       id-token: write
     steps:
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: distributions
           path: build
@@ -181,7 +181,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           path: artifacts
           merge-multiple: true
